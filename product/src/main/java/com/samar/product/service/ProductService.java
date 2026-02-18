@@ -5,6 +5,8 @@ import com.samar.product.dao.ProductRepository;
 import com.samar.product.dto.InventoryDto;
 import com.samar.product.dto.ProductDto;
 import com.samar.product.feign.ProductFeignClient;
+import com.samar.product.mapper.InventoryMapper;
+import com.samar.product.mapper.ProductMapper;
 import com.samar.product.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,22 +24,17 @@ public class ProductService {
     @Autowired
     ProductFeignClient productFeignClient;
 
+    final private ProductMapper productMapper=new ProductMapper();
+    final private InventoryMapper inventoryMapper=new InventoryMapper();
+
     public List<ProductDto> getAllProduct() {
         List<Product> products=productRepository.findAll();
         List<InventoryDto> inventoryDtos=productFeignClient.getAllFromInventory().getBody();
-
         List<ProductDto> productDtos=new ArrayList<>();
         for(int i=0;i<inventoryDtos.size();i++){
             ProductDto productDto=new ProductDto();
             if(inventoryDtos.get(i).getProductId()==products.get(i).getProductId()){
-                productDto.setProductName(products.get(i).getProductName());
-                productDto.setProductPrice(products.get(i).getProductPrice());
-                productDto.setProductId(products.get(i).getProductId());
-                productDto.setCategory(products.get(i).getCategory());
-                productDto.setDescription(products.get(i).getDescription());
-                productDto.setQuantity(inventoryDtos.get(i).getQuantity());
-                productDto.setInventoryId(inventoryDtos.get(i).getInventoryId());
-                productDtos.add(productDto);
+                productDtos.add(productMapper.productToDto(inventoryDtos.get(i),products.get(i)));
             }
         }
         return productDtos;
@@ -48,46 +45,30 @@ public class ProductService {
                 = productRepository.findById(id);
         InventoryDto inventoryDto=productFeignClient.getProductFromInventoryByProductId(id).getBody();
         ProductDto productDto=new ProductDto();
-        if (product.isPresent()){
-            productDto.setProductName(product.get().getProductName());
-            productDto.setProductPrice(product.get().getProductPrice());
-            productDto.setProductId(product.get().getProductId());
-            productDto.setCategory(product.get().getCategory());
-            productDto.setDescription(product.get().getDescription());
-            if(inventoryDto!=null){
-                productDto.setQuantity(inventoryDto.getQuantity());
-                productDto.setInventoryId(inventoryDto.getInventoryId());
-            }else{
-                return null;
-            }
-
-        }else {
-            return null;
+        if (product.isPresent()&& inventoryDto!=null){
+            return productMapper.productToDto(inventoryDto,product.get());
         }
-
-        return productDto;
-
+        return null;
     }
 
-    public void addProduct(ProductDto productDto) {
-        InventoryDto inventoryDto=new InventoryDto();
-        Product product=new Product();
-        inventoryDto.setProductId(productDto.getProductId());
-        inventoryDto.setQuantity(productDto.getQuantity());
-
-
-        product.setDescription(productDto.getDescription());
-        product.setProductPrice(productDto.getProductPrice());
-        product.setProductName(productDto.getProductName());
-        product.setCategory(productDto.getCategory());
-
+    public Boolean addProduct(ProductDto productDto) {
         try{
+        Product product=productMapper.dtoToProduct(productDto);
+        InventoryDto inventoryDto= inventoryMapper.productDtoToInventory(productDto);
         ResponseEntity<?> res= productFeignClient.addInventory(inventoryDto);
         productRepository.save(product);
+        return true;
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
         }
+        return false;
+    }
+
+    public int getProductQuantity(int id) {
+        InventoryDto inventoryDto=productFeignClient.getProductFromInventoryByProductId(id).getBody();
+        if(inventoryDto!=null)
+            return inventoryDto.getQuantity();
+        return  -1;
     }
 
 /*

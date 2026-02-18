@@ -22,7 +22,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.getAllProduct(),HttpStatus.OK);
     }
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/productId/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable int id){
         ProductDto productDto=productService.getProductById(id);
         if (productDto==null)
@@ -30,14 +30,23 @@ public class ProductController {
         return new ResponseEntity<>(productDto,HttpStatus.OK);
     }
 
+    @GetMapping("quantity/productId/{id}")
+    public ResponseEntity<Integer> getProductQuantity(@PathVariable int id){
+        int response=productService.getProductQuantity(id);
+        if(response==-1)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
+    }
 
 
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(@RequestBody ProductDto productDto){
-        productService.addProduct(productDto);
+    public ResponseEntity<Boolean> addProduct(@RequestBody ProductDto productDto){
+        boolean check=productService.addProduct(productDto);
+        if(!check)
+            return new ResponseEntity<>(false,HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(true,HttpStatus.CREATED);
     }
 
 /*
