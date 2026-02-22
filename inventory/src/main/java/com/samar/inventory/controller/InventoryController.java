@@ -30,9 +30,26 @@ public class InventoryController {
     }
     @PostMapping("add")
     public ResponseEntity<?> addInventory(@RequestBody InventoryDto inventoryDto){
-        inventoryService.addInventory(inventoryDto);
+        Boolean check=inventoryService.addInventory(inventoryDto);
+        if(!check)
+            return new ResponseEntity<>(false,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(true,HttpStatus.OK);
+    }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PutMapping("update/productId/{id}")
+    public ResponseEntity<Boolean> updateInventory(@RequestBody InventoryDto inventoryDto,@PathVariable int id){
+        Boolean check=inventoryService.updateInventory(inventoryDto,id);
+        if(!check)
+            return new ResponseEntity<>(false,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(true,HttpStatus.OK);
+    }
+
+    @DeleteMapping("delete/productId/{id}")
+    public ResponseEntity<Boolean> deleteInventory(@PathVariable int id){
+        Boolean check=inventoryService.deleteInventory(id);
+        if(!check)
+            return new ResponseEntity<>(false,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(true,HttpStatus.OK);
     }
 
 }

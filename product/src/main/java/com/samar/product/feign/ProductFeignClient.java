@@ -11,7 +11,7 @@ import java.util.List;
 @FeignClient("INVENTORY-SERVICE")
 public interface ProductFeignClient {
     @PostMapping("/inventory/add")
-    public ResponseEntity<?> addInventory(@RequestBody InventoryDto inventoryDto);
+    public ResponseEntity<Boolean> addInventory(@RequestBody InventoryDto inventoryDto);
 
     @GetMapping("inventory")
     public ResponseEntity<List<InventoryDto>> getAllFromInventory();
@@ -21,4 +21,12 @@ public interface ProductFeignClient {
 
     @GetMapping("/inventory/id/{id}")
     public  ResponseEntity<InventoryDto> getProductFromInventoryById(@PathVariable int id);
+
+    @PutMapping("/inventory/update/productId/{id}")
+    public ResponseEntity<Boolean> updateInventory(@RequestBody InventoryDto inventoryDto,@PathVariable int id);
+
+    @DeleteMapping("/inventory/delete/productId/{id}")
+    public ResponseEntity<Boolean> deleteInventory(@PathVariable int id);
+
+
 }

@@ -48,16 +48,7 @@ public class ProductController {
 
         return new ResponseEntity<>(true,HttpStatus.CREATED);
     }
-
-/*
-    @GetMapping("productname/{name}")
-        public ResponseEntity<ProductDto> getProductByName(@PathVariable String name){
-            ProductDto productDto=productService.getProductByName(name);
-            if (productDto==null)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(productDto,HttpStatus.OK);
-        }
-    @PutMapping("/update/id/{id}")
+    @PutMapping("/update/productId/{id}")
     public ResponseEntity<?> updateProductById(@PathVariable int id,@RequestBody ProductDto productDto){
         boolean check= productService.updateProductById(id,productDto);
 
@@ -74,6 +65,15 @@ public class ProductController {
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
+/*
+    @GetMapping("productname/{name}")
+        public ResponseEntity<ProductDto> getProductByName(@PathVariable String name){
+            ProductDto productDto=productService.getProductByName(name);
+            if (productDto==null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(productDto,HttpStatus.OK);
+        }
+
 */
 
 }

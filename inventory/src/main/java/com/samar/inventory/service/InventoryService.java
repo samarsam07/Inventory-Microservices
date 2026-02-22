@@ -7,6 +7,7 @@ import com.samar.inventory.model.Inventory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +44,23 @@ public class InventoryService {
         return inventoryDto;
     }
 
-    public void addInventory(InventoryDto inventoryDto) {
-        Inventory inventory=new Inventory();
-        inventory.setQuantity(inventoryDto.getQuantity());
-        inventory.setProductId(inventoryDto.getProductId());
-        inventoryRepository.save(inventory);
+    public Boolean addInventory(InventoryDto inventoryDto) {
+        try {
+            if(inventoryRepository.existsById(inventoryDto.getInventoryId())){
+                System.out.println("inventory id already in use by another product ");
+                return false;
+            }
+            Inventory inventory=new Inventory();
+            inventory.setQuantity(inventoryDto.getQuantity());
+            inventory.setProductId(inventoryDto.getProductId());
+            System.out.println("check");
+            inventoryRepository.save(inventory);
+            System.out.println("check");
+                return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
     public InventoryDto getProductFromInventoryByProductId(int id) {
@@ -57,5 +70,33 @@ public class InventoryService {
         inventoryDto.setProductId(inventory.getProductId());
         inventoryDto.setInventoryId(inventory.getInventoryId());
         return inventoryDto;
+    }
+
+    @Transactional
+    public Boolean updateInventory(InventoryDto inventoryDto, int id) {
+        try{
+            Optional<Inventory> inventory= Optional.ofNullable(inventoryRepository.findByProductId(id));
+            if (inventory.isPresent()) {
+                inventory.get().setProductId(inventoryDto.getProductId()!=0?inventoryDto.getProductId():inventory.get().getProductId());
+                inventory.get().setQuantity(inventoryDto.getQuantity()!=0?inventoryDto.getQuantity():inventory.get().getQuantity());
+                inventory.get().setInventoryId(inventoryDto.getInventoryId() != 0 ? inventoryDto.getInventoryId() : inventory.get().getInventoryId());
+                inventoryRepository.save(inventory.get());
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
+    @Transactional
+    public Boolean deleteInventory(int id) {
+        try{
+            inventoryRepository.deleteByProductId(id);
+            return true;
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 }

@@ -2,6 +2,7 @@ package com.samar.product.mapper;
 
 import com.samar.product.dto.InventoryDto;
 import com.samar.product.dto.ProductDto;
+import com.samar.product.model.Product;
 
 public class InventoryMapper {
     public InventoryDto productDtoToInventory(ProductDto productDto){
@@ -11,4 +12,5 @@ public class InventoryMapper {
         inventoryDto.setQuantity(productDto.getQuantity());
         return inventoryDto;
     }
+
 }

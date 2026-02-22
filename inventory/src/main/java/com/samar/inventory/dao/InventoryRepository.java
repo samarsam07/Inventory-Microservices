@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface InventoryRepository extends JpaRepository<Inventory,Integer> {
 
     Inventory findByProductId(int productId);
+
+    void deleteByProductId(int id);
 }

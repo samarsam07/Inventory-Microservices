@@ -20,6 +20,15 @@ public class ProductMapper {
     public Product dtoToProduct(ProductDto productDto){
         Product product=new Product();
         product.setDescription(productDto.getDescription());
+        product.setProductId(productDto.getProductId());
+        product.setProductPrice(productDto.getProductPrice());
+        product.setProductName(productDto.getProductName());
+        product.setCategory(productDto.getCategory());
+        return product;
+    }
+    public Product productDtoToDao(ProductDto productDto){
+        Product product=new Product();
+        product.setDescription(productDto.getDescription());
         product.setProductPrice(productDto.getProductPrice());
         product.setProductName(productDto.getProductName());
         product.setCategory(productDto.getCategory());
