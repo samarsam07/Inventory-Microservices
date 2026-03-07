@@ -6,15 +6,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Order {
-
+public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int orderId;
     private int productId;
     private int quantity;
-    private int totalPrice;
     private String status;
+    private int totalProductPrice;
+
+    public int getTotalProductPrice() {
+        return totalProductPrice;
+    }
+
+    public void setTotalProductPrice(int totalProductPrice) {
+        this.totalProductPrice = totalProductPrice;
+    }
 
     public int getOrderId() {
         return orderId;
@@ -24,12 +31,12 @@ public class Order {
         this.orderId = orderId;
     }
 
-    public int getProductId() {
-        return productId;
+    public String getStatus() {
+        return status;
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public int getQuantity() {
@@ -40,19 +47,11 @@ public class Order {
         this.quantity = quantity;
     }
 
-    public int getTotalPrice() {
-        return totalPrice;
+    public int getProductId() {
+        return productId;
     }
 
-    public void setTotalPrice(int totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public void setProductId(int productId) {
+        this.productId = productId;
     }
 }

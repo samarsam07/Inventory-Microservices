@@ -15,88 +15,140 @@ import java.util.Optional;
 
 @Service
 public class InventoryService {
-
     @Autowired
     InventoryRepository inventoryRepository;
 
-
-    public List<InventoryDto> getAllFromInventory() {
-        List<Inventory>inventories=inventoryRepository.findAll();
+    public List<InventoryDto> getAllInventory() {
+        List<Inventory> inventories=inventoryRepository.findAll();
         List<InventoryDto> inventoryDtos=new ArrayList<>();
-        for (Inventory inventory:inventories){
-            InventoryDto inventoryDto= new InventoryDto();
+        for(Inventory inventory:inventories){
+            InventoryDto inventoryDto=new InventoryDto();
             inventoryDto.setInventoryId(inventory.getInventoryId());
-            inventoryDto.setProductId(inventory.getProductId());
             inventoryDto.setQuantity(inventory.getQuantity());
+            inventoryDto.setProductId(inventory.getProductId());
             inventoryDtos.add(inventoryDto);
         }
-        return inventoryDtos;
+        return  inventoryDtos;
     }
 
-    public InventoryDto getProductFromInventoryById(int id) {
-        InventoryDto inventoryDto=new InventoryDto();
+
+    public InventoryDto getInventoryById(int id) {
         Optional<Inventory> inventory=inventoryRepository.findById(id);
-        if (inventory.isPresent()){
-            inventoryDto.setInventoryId(inventory.get().getInventoryId());
+        InventoryDto inventoryDto=new InventoryDto();
+        if(inventory.isPresent()){
             inventoryDto.setProductId(inventory.get().getProductId());
             inventoryDto.setQuantity(inventory.get().getQuantity());
+            inventoryDto.setInventoryId(inventory.get().getInventoryId());
+            return inventoryDto;
         }
-        return inventoryDto;
-    }
 
-    public Boolean addInventory(InventoryDto inventoryDto) {
-        try {
-            if(inventoryRepository.existsById(inventoryDto.getInventoryId())){
-                System.out.println("inventory id already in use by another product ");
-                return false;
-            }
-            Inventory inventory=new Inventory();
-            inventory.setQuantity(inventoryDto.getQuantity());
-            inventory.setProductId(inventoryDto.getProductId());
-            System.out.println("check");
-            inventoryRepository.save(inventory);
-            System.out.println("check");
-                return true;
+        return  null;
+    }
+    public  InventoryDto getInventoryByProductId(int id){
+        try{
+            Inventory inventory=inventoryRepository.findByProductId(id);
+            if (inventory==null)
+                return null;
+            InventoryDto inventoryDto=new InventoryDto();
+            inventoryDto.setInventoryId(inventory.getInventoryId());
+            inventoryDto.setQuantity(inventory.getQuantity());
+            inventoryDto.setProductId(inventory.getProductId());
+
+            return inventoryDto;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+    }
+    public Boolean addProductInInventory(InventoryDto inventoryDto) {
+        if(inventoryRepository.existsByProductId(inventoryDto.getProductId()))
+            return false;
+        try{
+            Inventory inventory=new Inventory();
+            inventory.setProductId(inventoryDto.getProductId());
+            inventory.setQuantity(inventoryDto.getQuantity());
+            inventoryRepository.save(inventory);
+            return  true;
+        } catch (RuntimeException e) {
             System.out.println(e.getMessage());
         }
         return false;
-    }
-
-    public InventoryDto getProductFromInventoryByProductId(int id) {
-        Inventory inventory=inventoryRepository.findByProductId(id);
-        InventoryDto inventoryDto=new InventoryDto();
-        inventoryDto.setQuantity(inventory.getQuantity());
-        inventoryDto.setProductId(inventory.getProductId());
-        inventoryDto.setInventoryId(inventory.getInventoryId());
-        return inventoryDto;
     }
 
     @Transactional
     public Boolean updateInventory(InventoryDto inventoryDto, int id) {
         try{
             Optional<Inventory> inventory= Optional.ofNullable(inventoryRepository.findByProductId(id));
-            if (inventory.isPresent()) {
-                inventory.get().setProductId(inventoryDto.getProductId()!=0?inventoryDto.getProductId():inventory.get().getProductId());
+            if(inventory.isPresent()){
                 inventory.get().setQuantity(inventoryDto.getQuantity()!=0?inventoryDto.getQuantity():inventory.get().getQuantity());
-                inventory.get().setInventoryId(inventoryDto.getInventoryId() != 0 ? inventoryDto.getInventoryId() : inventory.get().getInventoryId());
+                inventory.get().setProductId(inventoryDto.getProductId()!=0?inventoryDto.getProductId():inventory.get().getProductId());
+                inventory.get().setInventoryId(inventoryDto.getInventoryId()!=0?inventoryDto.getInventoryId():inventory.get().getInventoryId());
                 inventoryRepository.save(inventory.get());
                 return true;
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e){
             System.out.println(e.getMessage());
         }
         return false;
     }
 
     @Transactional
-    public Boolean deleteInventory(int id) {
-        try{
-            inventoryRepository.deleteByProductId(id);
+    public Boolean deleteInventory(int productId) {
+
+        try {
+            Inventory inventory = inventoryRepository.findByProductId(productId);
+
+            if (inventory == null) {
+                System.out.println("Inventory not found");
+                return false;
+            }
+
+            inventoryRepository.delete(inventory);
+
+            System.out.println("Inventory deleted successfully");
             return true;
-        }catch (Exception e){
-            System.out.println(e.getMessage());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
+    }
+
+    public Boolean checkQuantity(int id, Integer quantity) {
+        Inventory inventory= inventoryRepository.findByProductId(id);
+        System.out.println(inventory);
+        if(inventory==null)
+            return  false;
+
+        if(inventory.getQuantity()<quantity)
+            return false;
+//        Inventory inv=new Inventory();
+//        inv.setQuantity(inventory.get().getQuantity()-quantity);
+//        inv.setProductId(inventory.get().getProductId());
+//        inv.setInventoryId(inventory.get().getInventoryId());
+        inventory.setQuantity(inventory.getQuantity()-quantity);
+        inventoryRepository.save(inventory);
+        System.out.println("DOne");
+        return true;
+    }
+    public void save(Inventory inventory){
+        inventoryRepository.save(inventory);
+    }
+
+    @Transactional
+    public boolean restore(int productId, int quantity) {
+
+        Inventory inventory = inventoryRepository
+                .findByProductId(productId);
+
+        if (inventory == null)
+            return false;
+
+        inventory.setQuantity(inventory.getQuantity() + quantity);
+        inventoryRepository.save(inventory);
+
+        return true;
     }
 }
